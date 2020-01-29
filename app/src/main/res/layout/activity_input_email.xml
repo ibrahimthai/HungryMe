@@ -1,0 +1,85 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_input_email"
+    android:layout_width="match_parent"
+    android:background="@drawable/background3"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context=".AccountRecovery.InputEmailActivity"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Forgot Password"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:textSize="45sp"
+        android:shadowDx="-4"
+        android:shadowDy="4"
+        android:shadowRadius="6"
+        android:shadowColor="@color/text_shadow" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter your email to reset your password."
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:textSize="14sp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="35dp"
+        android:shadowDx="-4"
+        android:shadowDy="4"
+        android:shadowRadius="6"
+        android:shadowColor="@color/text_shadow"/>
+
+    <EditText
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:background="@drawable/rounded_edit_text"
+        android:hint="Email Address"
+        android:layout_margin="10dp"
+        android:inputType="textEmailAddress"
+        android:textColor="#FFF"
+        android:textColorHint="#FFFFFF"
+        android:gravity="center"
+        android:id="@+id/userEmail"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="3"
+        android:shadowColor="@color/text_shadow"
+        style="@style/Widget.AppCompat.EditText" />
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_margin="10dp"
+        android:text="Submit"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/rounded_button"
+        android:id="@+id/submitEmailButton" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:text="I remember my password"
+            android:id="@+id/rememberPasswordLink"
+            android:clickable="true"
+            android:shadowDx="-4"
+            android:shadowDy="4"
+            android:shadowRadius="6"
+            android:shadowColor="@color/text_shadow"/>
+
+    </LinearLayout>
+
+</LinearLayout>

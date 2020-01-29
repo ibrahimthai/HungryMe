@@ -1,0 +1,508 @@
+Index: app/src/main/java/pt/ismai/hungryme/ui/Utils.java
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/Utils.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/Utils.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
+@@ -1,38 +0,0 @@
+-package pt.ismai.hungryme.ui;
+-
+-import android.app.Activity;
+-import android.content.Intent;
+-
+-import pt.ismai.hungryme.R;
+-
+-
+-public class Utils
+-{
+-    private static int sTheme;
+-    public final static int THEME_BLUE = 0;
+-    public final static int THEME_RED = 1;
+-    public final static int THEME_GREEN = 2;
+-
+-    public static void changeToTheme(Activity activity, int theme)
+-    {
+-        sTheme = theme;
+-        activity.finish();
+-        activity.startActivity(new Intent(activity, activity.getClass()));
+-    }
+-    public static void onActivityCreateSetTheme(Activity activity)
+-    {
+-        switch (sTheme)
+-        {
+-            default:
+-            case THEME_BLUE:
+-                activity.setTheme(R.style.Base_Theme);
+-                break;
+-            case THEME_RED:
+-                activity.setTheme(R.style.Base_Theme2);
+-                break;
+-            case THEME_GREEN:
+-                activity.setTheme(R.style.Base_Theme3);
+-                break;
+-        }
+-    }
+-}
+\ No newline at end of file
+Index: app/src/main/java/pt/ismai/hungryme/HelpingClass/FavoriteListAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/HelpingClass/FavoriteListAdapter.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/HelpingClass/FavoriteListAdapter.java	(date 1549931634953)
+@@ -18,6 +18,7 @@
+ import com.bumptech.glide.request.target.SimpleTarget;
+ 
+ import java.util.ArrayList;
++import java.util.HashSet;
+ 
+ import pt.ismai.hungryme.R;
+ import pt.ismai.hungryme.Recipe.FavoriteRecipe;
+Index: app/src/main/java/pt/ismai/hungryme/ui/FavoritesActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/FavoritesActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/FavoritesActivity.java	(date 1550111641583)
+@@ -24,7 +24,7 @@
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        Utils.onActivityCreateSetTheme(this);
++        BaseActivity.onActivityCreateSetTheme(this);
+         setContentView(R.layout.activity_favorites);
+         setupToolbar();
+ 
+Index: app/src/main/java/pt/ismai/hungryme/LoginAndRegister/DbHelper.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/LoginAndRegister/DbHelper.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/LoginAndRegister/DbHelper.java	(date 1550098342585)
+@@ -12,16 +12,22 @@
+ 
+ import java.io.ByteArrayOutputStream;
+ 
++/**
++ * This class creates an SQL database that will store all the user's account information and credentials
++ */
+ public class DbHelper extends SQLiteOpenHelper {
++        // Initializes a name for the database file
+         public static final String TAG = DbHelper.class.getSimpleName();
+         public static final String DB_NAME = "myapp.db";
+         public static final int DB_VERSION = 1;
+ 
++        // Column names for the SQL database
+         public static final String USER_TABLE = "users";
+         public static final String COLUMN_ID = "_id";
+         public static final String COLUMN_EMAIL = "email";
+         public static final String COLUMN_PASS = "password";
+ 
++        // SQL command to create a table containing account information
+         public static final String CREATE_TABLE_USERS = "CREATE TABLE " + USER_TABLE + "("
+             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+             + COLUMN_EMAIL + " TEXT,"
+@@ -42,7 +48,11 @@
+             onCreate(db);
+         }
+ 
+-
++    /**
++     * Adds the users credentials to the database in order for the user create an account.
++     * @param email* The email address to add.
++     * @param password* The password.
++     */
+     public void addUser(String email, String password) {
+         SQLiteDatabase db = this.getWritableDatabase();
+ 
+@@ -56,6 +66,11 @@
+         Log.d(TAG, "user inserted" + id);
+     }
+ 
++    /**
++     * Gets the users credentials from the database in order for the user to login.
++     * @param email* The email address.
++     * @param pass* The password.
++     */
+     public boolean getUser(String email, String pass){
+         String selectQuery = "select * from  " + USER_TABLE + " where " +
+                 COLUMN_EMAIL + " = " + "'"+email+"'" + " and " + COLUMN_PASS + " = " + "'"+pass+"'";
+@@ -64,7 +79,6 @@
+         Cursor cursor = db.rawQuery(selectQuery, null);
+         cursor.moveToFirst();
+         if (cursor.getCount() > 0) {
+-
+             return true;
+         }
+         cursor.close();
+Index: app/src/main/java/pt/ismai/hungryme/LoginAndRegister/RegisterActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/LoginAndRegister/RegisterActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/LoginAndRegister/RegisterActivity.java	(date 1550097154023)
+@@ -11,6 +11,9 @@
+ 
+ import pt.ismai.hungryme.R;
+ 
++/**
++ * A registration page where the user can create his/her own account, in order to login to the application
++ */
+ public class RegisterActivity extends AppCompatActivity implements View.OnClickListener{
+     private Button reg;
+     private TextView tvLogin;
+Index: app/src/main/java/pt/ismai/hungryme/ui/WebViewActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/WebViewActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/WebViewActivity.java	(date 1550111581790)
+@@ -41,7 +41,7 @@
+         String url = getIntent().getStringExtra("url");
+         mWebview .loadUrl(url);
+ 
+-        Utils.onActivityCreateSetTheme(this);
++        BaseActivity.onActivityCreateSetTheme(this);
+         setContentView(mWebview);
+ 
+     }
+Index: app/src/main/java/pt/ismai/hungryme/ui/UI/BaseActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/UI/BaseActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/UI/BaseActivity.java	(date 1550113095686)
+@@ -1,5 +1,6 @@
+ package pt.ismai.hungryme.ui.UI;
+ 
++import android.app.Activity;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+@@ -185,4 +186,38 @@
+         setSupportActionBar(toolbar);
+         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+     }
++
++
++    /**
++     * This method controls the theme of the app
++     * This was moved from the Util class to the BaseActivity to reduce coupling
++     */
++    private static int sTheme;
++    public final static int THEME_BLUE = 0;
++    public final static int THEME_RED = 1;
++    public final static int THEME_GREEN = 2;
++
++    public static void changeToTheme(Activity activity, int theme)
++    {
++        sTheme = theme;
++        activity.finish();
++        activity.startActivity(new Intent(activity, activity.getClass()));
++    }
++    public static void onActivityCreateSetTheme(Activity activity)
++    {
++        switch (sTheme)
++        {
++            default:
++            case THEME_BLUE:
++                activity.setTheme(R.style.Base_Theme);
++                break;
++            case THEME_RED:
++                activity.setTheme(R.style.Base_Theme2);
++                break;
++            case THEME_GREEN:
++                activity.setTheme(R.style.Base_Theme3);
++                break;
++        }
++    }
++
+ }
+Index: app/app.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/app.iml	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/app.iml	(date 1550095403015)
+@@ -47,13 +47,6 @@
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/java" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/rs" isTestSource="false" />
+       <sourceFolder url="file://$MODULE_DIR$/src/debug/shaders" isTestSource="false" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/res" type="java-test-resource" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/resources" type="java-test-resource" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/assets" type="java-test-resource" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/aidl" isTestSource="true" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/java" isTestSource="true" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/rs" isTestSource="true" />
+-      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/shaders" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/testDebug/res" type="java-test-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/testDebug/resources" type="java-test-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/testDebug/assets" type="java-test-resource" />
+@@ -61,6 +54,13 @@
+       <sourceFolder url="file://$MODULE_DIR$/src/testDebug/java" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/testDebug/rs" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/testDebug/shaders" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/res" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/resources" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/assets" type="java-test-resource" />
++      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/aidl" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/java" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/rs" isTestSource="true" />
++      <sourceFolder url="file://$MODULE_DIR$/src/androidTestDebug/shaders" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/main/res" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+       <sourceFolder url="file://$MODULE_DIR$/src/main/assets" type="java-resource" />
+@@ -82,30 +82,44 @@
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/java" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/rs" isTestSource="true" />
+       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/shaders" isTestSource="true" />
++      <excludeFolder url="file://$MODULE_DIR$/build/generated/not_namespaced_r_class_sources" />
++      <excludeFolder url="file://$MODULE_DIR$/build/generated/source/r" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/annotation_processor_list" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/apk_list" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/blame" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/build-info" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/builds" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/bundle_manifest" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/check_manifest_result" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/compatible_screen_manifest" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/external_libs_dex" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-runtime-classes" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-verifier" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant-run-apk" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant_app_manifest" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant_run_app_info_output_file" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant_run_main_apk_resources" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant_run_merged_manifests" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/instant_run_split_apk_resources" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/javac" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jniLibs" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/lint_jar" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifest-checker" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/merged_assets" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/merged_manifests" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/metadata_feature_manifest" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/prebuild" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/processed_res" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/reload-dex" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/res" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/resources" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/shader_assets" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/shaders" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/signing_config" />
++      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/split-apk" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
+       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/transforms" />
+       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+@@ -113,28 +127,28 @@
+     </content>
+     <orderEntry type="jdk" jdkName="Android API 26 Platform" jdkType="Android SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
++    <orderEntry type="library" name="Gradle: com.doodle.android:android-material-chips:1.1.0@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.rengwuxian.materialedittext:library:2.1.4@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:cardview-v7:23.1.1@aar" level="project" />
+     <orderEntry type="library" name="Gradle: com.nineoldandroids:library:2.4.0@jar" level="project" />
+-    <orderEntry type="library" name="Gradle: com.github.ganfra:material-spinner-1.1.1" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:preference-v7-23.4.0" level="project" />
+-    <orderEntry type="library" name="Gradle: com.makeramen:roundedimageview-2.0.1" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:appcompat-v7-23.4.0" level="project" />
+-    <orderEntry type="library" name="Gradle: com.rengwuxian.materialedittext:library-2.1.4" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:design:23.1.1@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.makeramen:roundedimageview:2.0.1@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:animated-vector-drawable:23.4.0@aar" level="project" />
+     <orderEntry type="library" name="Gradle: com.jakewharton:butterknife:7.0.1@jar" level="project" />
+-    <orderEntry type="library" name="Gradle: com.doodle.android:android-material-chips-1.1.0" level="project" />
+-    <orderEntry type="library" name="Gradle: de.hdodenhof:circleimageview-2.0.0" level="project" />
+-    <orderEntry type="library" name="Gradle: com.codevscolor.materialpreference:mp-0.2.1" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:recyclerview-v7:23.4.0@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:support-vector-drawable:23.4.0@aar" level="project" />
++    <orderEntry type="library" name="Gradle: de.hdodenhof:circleimageview:2.0.0@aar" level="project" />
+     <orderEntry type="library" name="Gradle: com.github.bumptech.glide:glide:3.6.1@jar" level="project" />
+     <orderEntry type="library" name="Gradle: com.squareup.picasso:picasso:2.5.2@jar" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:animated-vector-drawable-23.4.0" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:cardview-v7-23.1.1" level="project" />
++    <orderEntry type="library" name="Gradle: com.github.ganfra:material-spinner:1.1.1@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:preference-v7:23.4.0@aar" level="project" />
+     <orderEntry type="library" name="Gradle: org.apache.httpcomponents:httpmime:4.2.3@jar" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:support-v4-23.4.0" level="project" />
++    <orderEntry type="library" name="Gradle: com.codevscolor.materialpreference:mp:0.2.1@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:appcompat-v7:23.4.0@aar" level="project" />
+     <orderEntry type="library" name="Gradle: com.android.support:support-annotations:23.4.0@jar" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:design-23.1.1" level="project" />
+-    <orderEntry type="library" name="Gradle: com.miguelcatalan:materialsearchview-1.4.0" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:recyclerview-v7-23.4.0" level="project" />
++    <orderEntry type="library" name="Gradle: com.miguelcatalan:materialsearchview:1.4.0@aar" level="project" />
++    <orderEntry type="library" name="Gradle: com.android.support:support-v4:23.4.0@aar" level="project" />
+     <orderEntry type="library" name="Gradle: org.apache.httpcomponents:httpcore:4.2.2@jar" level="project" />
+-    <orderEntry type="library" name="Gradle: com.android.support:support-vector-drawable-23.4.0" level="project" />
+     <orderEntry type="library" name="Gradle: org.apache.http.legacy-android-26" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
+Index: app/src/main/java/pt/ismai/hungryme/LoginAndRegister/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/LoginAndRegister/LoginActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/LoginAndRegister/LoginActivity.java	(date 1550098637138)
+@@ -15,7 +15,9 @@
+ import pt.ismai.hungryme.ui.FavoritesActivity;
+ import pt.ismai.hungryme.ui.Recipes.RecipesActivity;
+ 
+-
++/**
++ * This class is where the user can input their account information (email and password) in order to login
++ */
+ public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
+         private Button login;
+         private TextView register;
+@@ -50,7 +52,10 @@
+                 finish();
+             }
+         }
+-
++    /**
++     * Calls out the RegisterActivity if the user wants to create his/her own account.
++     * Transfers from the Login page (LoginActivity) to the Registration page (RegistrationActivity)
++     */
+     public void toRegister(View v)
+     {
+         Intent myIntent = new Intent(LoginActivity.this, RegisterActivity.class);
+@@ -67,12 +72,16 @@
+             }
+         }
+ 
++    /**
++     * Calls out the FavoritesActivity once the user successfully logs in
++     */
+     public void login(){
+         String email = etEmail.getText().toString();
+         String pass = etPass.getText().toString();
+ 
+         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+ 
++        // If user successfully logs in, the user is brought to the Favourites screen (FavoritesActivity)
+         if(db.getUser(email,pass)){
+             session.setLoggedin(true);
+             SharedPreferences.Editor editor = sharedpreferences.edit();
+Index: app/src/main/java/pt/ismai/hungryme/ui/Recipes/RecipesActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/Recipes/RecipesActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/Recipes/RecipesActivity.java	(date 1550112947533)
+@@ -1,7 +1,6 @@
+ package pt.ismai.hungryme.ui.Recipes;
+ 
+ import android.content.Intent;
+-import android.content.SharedPreferences;
+ import android.os.Bundle;
+ import android.support.v7.app.ActionBar;
+ import android.view.Menu;
+@@ -10,12 +9,9 @@
+ 
+ import com.miguelcatalan.materialsearchview.MaterialSearchView;
+ 
+-import pt.ismai.hungryme.HelpingClass.JSONParser;
+-import pt.ismai.hungryme.HelpingClass.MyListAdapter;
+ import pt.ismai.hungryme.R;
+ import pt.ismai.hungryme.Recipe.RecipeContent;
+ import pt.ismai.hungryme.ui.UI.BaseActivity;
+-import pt.ismai.hungryme.ui.Utils;
+ 
+ public class RecipesActivity extends BaseActivity implements RecipeListFragment.Callback {
+     private boolean twoPaneMode;
+@@ -27,7 +23,7 @@
+ 
+ 
+ 
+-        Utils.onActivityCreateSetTheme(this);
++        BaseActivity.onActivityCreateSetTheme(this);
+ 
+         setContentView(R.layout.activity_list);
+         setupToolbar();
+Index: app/src/main/java/pt/ismai/hungryme/ui/Recipes/RecipeDetailActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/Recipes/RecipeDetailActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/Recipes/RecipeDetailActivity.java	(date 1550112947452)
+@@ -5,7 +5,6 @@
+ import pt.ismai.hungryme.R;
+ import pt.ismai.hungryme.Recipe.RecipeContent;
+ import pt.ismai.hungryme.ui.UI.BaseActivity;
+-import pt.ismai.hungryme.ui.Utils;
+ 
+ public class RecipeDetailActivity extends BaseActivity {
+ 
+@@ -15,7 +14,7 @@
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+ 
+-        Utils.onActivityCreateSetTheme(this);
++        BaseActivity.onActivityCreateSetTheme(this);
+ 
+         setContentView(R.layout.activity_detail);
+ 
+Index: app/src/main/java/pt/ismai/hungryme/ui/AccountActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/AccountActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/AccountActivity.java	(date 1550111674285)
+@@ -38,7 +38,7 @@
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        Utils.onActivityCreateSetTheme(this);
++        BaseActivity.onActivityCreateSetTheme(this);
+         setContentView(R.layout.activity_account);
+         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+         setupToolbar();
+Index: app/src/main/java/pt/ismai/hungryme/ui/SettingsActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/pt/ismai/hungryme/ui/SettingsActivity.java	(revision d6860215debb661c1404cbf75961f0a088f3fee9)
++++ app/src/main/java/pt/ismai/hungryme/ui/SettingsActivity.java	(date 1550120040362)
+@@ -35,7 +35,7 @@
+     protected void onCreate(Bundle savedInstanceState) {
+ 
+         super.onCreate(savedInstanceState);
+-        Utils.onActivityCreateSetTheme(this);
++        BaseActivity.onActivityCreateSetTheme(this);
+         setContentView(R.layout.activity_settings);
+         setupToolbar();
+ 
+@@ -167,15 +167,15 @@
+     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+         switch (buttonView.getId()) {
+             case R.id.switch_red:
+-                Utils.changeToTheme(this, Utils.THEME_RED);
++                BaseActivity.changeToTheme(this, BaseActivity.THEME_RED);
+                 break;
+ 
+             case R.id.switch_green:
+-                Utils.changeToTheme(this, Utils.THEME_GREEN);
++                BaseActivity.changeToTheme(this, BaseActivity.THEME_GREEN);
+                 break;
+ 
+             case R.id.switch_blue:
+-                Utils.changeToTheme(this, Utils.THEME_BLUE);
++                BaseActivity.changeToTheme(this, BaseActivity.THEME_BLUE);
+                 break;
+ 
+         }
